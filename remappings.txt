@@ -1,0 +1,7 @@
+@solady/=lib/solady/src/
+
+
+contracts/=src/contracts/
+interfaces/=src/interfaces
+tests/=tests/
+mocks/=src/mocks/
