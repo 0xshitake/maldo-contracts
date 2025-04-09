@@ -5,9 +5,9 @@ import {Script, console} from "forge-std/Script.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
 
 import {Registry} from "contracts/Registry.sol";
-import {HestiaToken} from "contracts/tokens/HestiaToken.sol";
+import {MaldoToken} from "contracts/tokens/MaldoToken.sol";
 
-contract HestiaScript is Script {
+contract MaldoScript is Script {
     
     function setUp() public {}
 
@@ -34,11 +34,11 @@ contract HestiaScript is Script {
         vm.stopBroadcast();
     }
     
-    function deployTokenHestia() public {
+    function deployTokenMaldo() public {
         uint256 privateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         vm.startBroadcast(privateKey);
 
-        ERC20 token = new HestiaToken();
+        ERC20 token = new MaldoToken();
 
         vm.stopBroadcast();
     }
