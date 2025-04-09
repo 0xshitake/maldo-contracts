@@ -5,21 +5,22 @@ import {Test, console} from "forge-std/Test.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
 import {IRegistry} from "interfaces/IRegistry.sol";
 import {Registry} from "contracts/Registry.sol";
-import {HestiaToken} from "contracts/tokens/HestiaToken.sol";
+import {MaldoToken} from "contracts/tokens/MaldoToken.sol";
 
 contract RegistryTest is Test {
 
     address deployer = makeAddr("deployer");
+    address tasker = makeAddr("tasker");
     address user = makeAddr("user");
     address anotherUser = makeAddr("anotherUser");
 
     Registry registry;
-    HestiaToken token;
+    MaldoToken token;
 
     function setUp() public {
         vm.startPrank(deployer);
 
-        token = new HestiaToken();
+        token = new MaldoToken();
         // should i pass the erc20 instance here instead?
         registry = new Registry(address(token));
 
@@ -59,17 +60,17 @@ contract RegistryTest is Test {
         // check emitted event
 
         // set profile
-        vm.prank(user);
+        vm.prank(tasker);
         registry.setProfile("profile");
         // check emitted event
 
         // add service
-        vm.prank(user);
+        vm.prank(tasker);
         registry.addService("service");
         // check emitted event
 
         // update service
-        vm.prank(user);
+        vm.prank(tasker);
         registry.updateService(0, "service, updated");
         // check emitted event
 
@@ -77,6 +78,20 @@ contract RegistryTest is Test {
         vm.startPrank(anotherUser);
         vm.expectRevert(abi.encodeWithSelector(IRegistry.Unauthorized.selector));
         registry.updateService(0, "service, updated again");
+        vm.stopPrank();
+
+        vm.startPrank(user);
+        vm.expectRevert(abi.encodeWithSelector(IRegistry.Unauthorized.selector));
+        registry.createDeal(0, 100, user);
+        vm.stopPrank();
+
+        vm.startPrank(tasker);
+        vm.expectRevert(abi.encodeWithSelector(IRegistry.InvalidBeneficiary.selector));
+        registry.createDeal(0, 100, address(0));
+        vm.stopPrank();
+
+        vm.startPrank(tasker);
+        registry.createDeal(0, 100, user);
         vm.stopPrank();
 
         // rate a service

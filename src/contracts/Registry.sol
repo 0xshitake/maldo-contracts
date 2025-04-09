@@ -21,6 +21,8 @@ contract Registry is IRegistry {
     /// @notice Array of services
     Service[] public services;
 
+    Deal[] public deals;
+
     /// @notice Maps service ids to an array of ratings
     mapping(uint40 _serviceId => Rating[] _ratings) public ratings;
 
@@ -87,18 +89,38 @@ contract Registry is IRegistry {
         emit ServiceUpdated(_serviceId, _description);
     }
 
+    function createDeal(uint40 _serviceId, uint256 _price, address _beneficiary) external {
+
+        if (services[_serviceId].tasker != msg.sender) revert Unauthorized();
+        
+        if (_beneficiary == address(0)) revert InvalidBeneficiary();
+
+        uint40 nextDealId = uint40(deals.length);
+
+        deals.push(Deal({
+            id: nextDealId,
+            serviceId: _serviceId,
+            price: _price,
+            beneficiary: _beneficiary
+        }));
+
+        emit DealCreated(nextDealId);
+    }
+
     /// @inheritdoc IRegistry
-    function rate(uint40 _serviceId, uint8 _rating, string calldata _review) external {
+    function rate(uint40 _dealId, uint8 _rating, string calldata _review) external {
 
-        // TODO: only users that have interacted with the tasker should be able to rate the service
+        if (deals[_dealId].beneficiary != msg.sender) revert Unauthorized();
+        // if (deals[_dealId].status != DealStatus.COMPLETED) revert DealNotCompleted();
 
-        ratings[_serviceId].push(Rating({
+        // add review to the service
+        ratings[deals[_dealId].serviceId].push(Rating({
             reviewer: msg.sender,
             rating: _rating,
             review: _review
         }));
 
-        emit Rated(_serviceId, _rating);
+        emit Rated(_dealId, _rating);
     }
 
     /// @inheritdoc IRegistry
@@ -120,4 +142,6 @@ contract Registry is IRegistry {
 
         // todo: emit event?
     }
+
+    
 }
