@@ -6,9 +6,8 @@ import {IRegistry} from "../interfaces/IRegistry.sol";
 import {IDisputeResolver} from "../interfaces/IDisputeResolver.sol";
 
 /// @title Registry
-/// @dev 
+/// @dev
 contract Registry is IRegistry {
-
     /// @notice The owner of the registry
     address public immutable owner;
 
@@ -20,6 +19,8 @@ contract Registry is IRegistry {
 
     /// @notice Array of services
     Service[] public services;
+
+    Deal[] public deals;
 
     /// @notice Maps service ids to an array of ratings
     mapping(uint40 _serviceId => Rating[] _ratings) public ratings;
@@ -37,9 +38,9 @@ contract Registry is IRegistry {
         if (_amount == 0) revert InvalidAmount();
 
         token.transferFrom(msg.sender, address(this), _amount);
-        
+
         users[msg.sender].stake += _amount;
-        
+
         emit Staked(msg.sender, _amount);
     }
 
@@ -47,18 +48,18 @@ contract Registry is IRegistry {
     function unstake(uint256 _amount) external {
         if (_amount == 0) revert InvalidAmount();
         if (users[msg.sender].stake < _amount) revert InsufficientStake();
-        
+
         users[msg.sender].stake -= _amount;
-        
+
         token.transfer(msg.sender, _amount);
-        
+
         emit Unstaked(msg.sender, _amount);
     }
 
     /// @inheritdoc IRegistry
     function setProfile(string calldata _profile) external {
         users[msg.sender].profile = _profile;
-        
+
         emit ProfileSet(msg.sender);
     }
 
@@ -66,12 +67,7 @@ contract Registry is IRegistry {
     function addService(string calldata _description) external {
         uint40 serviceId = uint40(services.length);
 
-        services.push(Service({
-            id: serviceId,
-            status: Status.NEW,
-            tasker: msg.sender,
-            description: _description
-        }));
+        services.push(Service({id: serviceId, status: Status.NEW, tasker: msg.sender, description: _description}));
 
         emit ServiceCreated(serviceId);
     }
@@ -80,25 +76,34 @@ contract Registry is IRegistry {
     function updateService(uint40 _serviceId, string calldata _description) external {
         // todo: add onlyTasker
         if (services[_serviceId].tasker != msg.sender) revert Unauthorized();
-        
+
         Service storage service = services[_serviceId];
         service.description = _description;
 
         emit ServiceUpdated(_serviceId, _description);
     }
 
+    function createDeal(uint40 _serviceId, uint256 _price, address _beneficiary) external {
+        if (services[_serviceId].tasker != msg.sender) revert Unauthorized();
+
+        if (_beneficiary == address(0)) revert InvalidBeneficiary();
+
+        uint40 nextDealId = uint40(deals.length);
+
+        deals.push(Deal({id: nextDealId, serviceId: _serviceId, price: _price, beneficiary: _beneficiary}));
+
+        emit DealCreated(nextDealId);
+    }
+
     /// @inheritdoc IRegistry
-    function rate(uint40 _serviceId, uint8 _rating, string calldata _review) external {
+    function rate(uint40 _dealId, uint8 _rating, string calldata _review) external {
+        if (deals[_dealId].beneficiary != msg.sender) revert Unauthorized();
+        // if (deals[_dealId].status != DealStatus.COMPLETED) revert DealNotCompleted();
 
-        // TODO: only users that have interacted with the tasker should be able to rate the service
+        // add review to the service
+        ratings[deals[_dealId].serviceId].push(Rating({reviewer: msg.sender, rating: _rating, review: _review}));
 
-        ratings[_serviceId].push(Rating({
-            reviewer: msg.sender,
-            rating: _rating,
-            review: _review
-        }));
-
-        emit Rated(_serviceId, _rating);
+        emit Rated(_dealId, _rating);
     }
 
     /// @inheritdoc IRegistry

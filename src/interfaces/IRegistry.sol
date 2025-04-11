@@ -5,7 +5,6 @@ import {ERC20} from "@solady/tokens/ERC20.sol";
 
 /// @title IRegistry
 interface IRegistry {
-
     /// @notice Status of a service in the registry
     /// @dev Unused
     /// @param NEW Initial state when service is created
@@ -18,7 +17,7 @@ interface IRegistry {
         BANNED,
         CANCELLED
     }
-    
+
     /// @notice User structure
     /// @param profile Ideally an IPFS hash, for now simply a string
     /// @param stake Amount of tokens staked by the user
@@ -26,7 +25,7 @@ interface IRegistry {
         string profile;
         uint256 stake;
     }
-    
+
     /// @notice Service listing structure
     /// @dev
     /// @param id Unique identifier for the service
@@ -50,17 +49,22 @@ interface IRegistry {
         string review;
     }
 
-    /// @unimplemented
+    /// @notice Deal structure
     /// @dev
+    /// @param id ID of the deal
+    /// @param serviceId ID of the service
+    /// @token Address of the token being used for the deal
+    /// @param price Price of the service
+    /// @param beneficiary Address of the beneficiary
     struct Deal {
         uint40 id;
         uint40 serviceId;
-        address token;
-        address price;
         address beneficiary;
-        // uint40 status?
-        // uint32 timeout?
+        // address token;
+        uint256 price;
     }
+    // DealStatus status?
+    // uint32 timeout?
 
     //////////////////////////////////////////////////////
     /////////////////////// EVENTS ///////////////////////
@@ -89,6 +93,9 @@ interface IRegistry {
     /// @param _description The new description of the service
     event ServiceUpdated(uint40 _serviceId, string _description);
 
+    /// @notice Emitted when a deal is created
+    /// @param _dealId The new deal's id
+    event DealCreated(uint40 _dealId);
 
     /// @notice Emitted when a service receives a rating
     /// @param _serviceId The rated service's id
@@ -96,7 +103,7 @@ interface IRegistry {
     event Rated(uint40 _serviceId, uint8 _rating);
 
     //////////////////////////////////////////////////////
-    /////////////////////// ERRORS ///////////////////////  
+    /////////////////////// ERRORS ///////////////////////
     //////////////////////////////////////////////////////
 
     /// @notice Emitted when a service rating is disputed
@@ -115,6 +122,8 @@ interface IRegistry {
     /// @notice Error thrown when dispute resolver is not set
     error DisputeResolverNotSet();
 
+    /// @notice Thrown when the beneficiary address is zero
+    error InvalidBeneficiary();
 
     //////////////////////////////////////////////////////
     ////////////////////// FUNCTIONS /////////////////////
@@ -156,5 +165,4 @@ interface IRegistry {
     /// @dev
     /// @param _disputeResolver Address of the dispute resolver\
     function setDisputeResolver(address _disputeResolver) external;
-
 }

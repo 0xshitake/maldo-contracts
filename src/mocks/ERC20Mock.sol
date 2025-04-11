@@ -4,14 +4,13 @@ pragma solidity ^0.8.26;
 import {ERC20} from "@solady/tokens/ERC20.sol";
 
 contract ERC20Mock is ERC20 {
-
     constructor() {}
 
-    function name() public pure override returns (string memory _name) {
+    function name() public pure virtual override returns (string memory _name) {
         _name = "Mock";
     }
 
-    function symbol() public pure override returns (string memory _symbol) {
+    function symbol() public pure virtual override returns (string memory _symbol) {
         _symbol = "MOCK";
     }
 
@@ -23,4 +22,3 @@ contract ERC20Mock is ERC20 {
         _burn(from, amount);
     }
 }
-
