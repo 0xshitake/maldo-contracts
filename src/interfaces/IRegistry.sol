@@ -5,7 +5,6 @@ import {ERC20} from "@solady/tokens/ERC20.sol";
 
 /// @title IRegistry
 interface IRegistry {
-
     /// @notice Status of a service in the registry
     /// @dev Unused
     /// @param NEW Initial state when service is created
@@ -18,7 +17,7 @@ interface IRegistry {
         BANNED,
         CANCELLED
     }
-    
+
     /// @notice User structure
     /// @param profile Ideally an IPFS hash, for now simply a string
     /// @param stake Amount of tokens staked by the user
@@ -26,7 +25,7 @@ interface IRegistry {
         string profile;
         uint256 stake;
     }
-    
+
     /// @notice Service listing structure
     /// @dev
     /// @param id Unique identifier for the service
@@ -63,9 +62,9 @@ interface IRegistry {
         address beneficiary;
         // address token;
         uint256 price;
-        // DealStatus status?
-        // uint32 timeout?
     }
+    // DealStatus status?
+    // uint32 timeout?
 
     //////////////////////////////////////////////////////
     /////////////////////// EVENTS ///////////////////////
@@ -104,7 +103,7 @@ interface IRegistry {
     event Rated(uint40 _serviceId, uint8 _rating);
 
     //////////////////////////////////////////////////////
-    /////////////////////// ERRORS ///////////////////////  
+    /////////////////////// ERRORS ///////////////////////
     //////////////////////////////////////////////////////
 
     /// @notice Emitted when a service rating is disputed
@@ -166,5 +165,4 @@ interface IRegistry {
     /// @dev
     /// @param _disputeResolver Address of the dispute resolver\
     function setDisputeResolver(address _disputeResolver) external;
-
 }

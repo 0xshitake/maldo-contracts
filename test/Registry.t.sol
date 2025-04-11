@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Test, console} from "forge-std/Test.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
-import {IRegistry} from "interfaces/IRegistry.sol";
+
 import {Registry} from "contracts/Registry.sol";
 import {MaldoToken} from "contracts/tokens/MaldoToken.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {IRegistry} from "interfaces/IRegistry.sol";
 
 contract RegistryTest is Test {
-
     address deployer = makeAddr("deployer");
     address tasker = makeAddr("tasker");
     address user = makeAddr("user");
@@ -28,7 +28,6 @@ contract RegistryTest is Test {
     }
 
     function test_integration() public {
-
         // registry doesn't have allowance to stake the user's tokens
         vm.startPrank(user);
         vm.expectRevert(abi.encodeWithSelector(ERC20.InsufficientAllowance.selector));
