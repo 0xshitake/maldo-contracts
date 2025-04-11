@@ -11,20 +11,24 @@
 
 [!] We allow _anyone_ to interact with this Registry contract. In a later stage, we will restrict interactions exclusively to _MaldoWallets_, managed by an in-house API that handles wallet creation through Pimlico, or even through an authorized operator controlled by us.
 
-#### ERC1155 badges
+#### Badges Reputation System
 
 Not developed yet, but we would mint different badges to:
 - users that achieve certain level of activity (# of deals completed, # of reviews)
 - users that complete specific IRL courses
 -
 
-#### DisputeResolver
-
-Not used. Kleros is pushing an off-chain approach for dispute resolution so we hold the tinkering/develop of this.
+Also, we're exploring using [EIP-6909](https://eips.ethereum.org/EIPS/eip-6909)
 
 #### MaldoToken
 
 Not used at the moment. Ideally we would allow taskers to create deals only if they havve available stake tokens. That way, in case of a dispute the `DisputResolver` would slash the tasker's stake.
+
+#### DisputeResolver
+
+Not used. Kleros is pushing an off-chain approach for dispute resolution so we hold the tinkering/develop of this.
+
+That said, we did some explorations with Kleros' Escrow and TCRs and we're ready to re-take this path of development to ensure full integration with the Kleros applications.
 
 ### Dependencies
 
