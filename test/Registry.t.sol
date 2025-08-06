@@ -12,7 +12,7 @@ import {IRegistry} from "interfaces/IRegistry.sol";
 // Mock Escrow contract for testing
 contract MockEscrow {
     uint256 private nextId = 1;
-    
+
     function createERC20Transaction(
         uint256,
         address,

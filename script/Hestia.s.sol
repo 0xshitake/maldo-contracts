@@ -9,7 +9,6 @@ import {MaldoToken} from "../src/contracts/tokens/MaldoToken.sol";
 import {Registry} from "../src/contracts/Registry.sol";
 import {Badges} from "../src/contracts/Badges.sol";
 
-
 contract MaldoScript is Script {
     function setUp() public {}
 
@@ -29,10 +28,10 @@ contract MaldoScript is Script {
     function fullDeploy(address _token) public {
         uint256 privateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         address deployer = vm.addr(privateKey);
-        
+
         // Deploy contracts in order
         Badges badges = deployBadges(deployer);
-        
+
         Registry registry = deployRegistry(_token, address(badges), SEPOLIA_ESCROW_ADDRESS);
     }
 

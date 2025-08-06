@@ -98,7 +98,12 @@ contract Registry is IRegistry {
     }
 
     /// @inheritdoc IRegistry
-    function createDeal(uint40 _serviceId, uint256 _price, address _beneficiary, string calldata _agreementURI) external {
+    function createDeal(
+        uint40 _serviceId,
+        uint256 _price,
+        address _beneficiary,
+        string calldata _agreementURI
+    ) external {
         if (services[_serviceId].tasker != msg.sender) revert Unauthorized();
 
         if (_beneficiary == address(0)) revert InvalidBeneficiary();
@@ -107,14 +112,24 @@ contract Registry is IRegistry {
 
         uint256 agreementId = _createEscrowAgreement(_beneficiary, _price, _agreementURI);
 
-        deals.push(Deal({id: nextDealId, serviceId: _serviceId, price: _price, beneficiary: _beneficiary, agreementId: agreementId}));
+        deals.push(
+            Deal({
+                id: nextDealId,
+                serviceId: _serviceId,
+                price: _price,
+                beneficiary: _beneficiary,
+                agreementId: agreementId
+            })
+        );
 
         emit DealCreated(nextDealId);
     }
 
     /// @inheritdoc IRegistry
     function rate(uint40 _dealId, uint8 _rating, string calldata _review) external {
-        if (deals[_dealId].beneficiary != msg.sender && services[deals[_dealId].serviceId].tasker != msg.sender) revert Unauthorized();
+        if (deals[_dealId].beneficiary != msg.sender && services[deals[_dealId].serviceId].tasker != msg.sender) {
+            revert Unauthorized();
+        }
         // if (deals[_dealId].status != DealStatus.COMPLETED) revert DealNotCompleted();
 
         // add review to the service
@@ -145,17 +160,13 @@ contract Registry is IRegistry {
 
     // Escrow functions
 
-    
-    function _createEscrowAgreement(address _beneficiary, uint256 _amount, string calldata _agreementURI)
-        internal
-        returns (uint256 _agreementId)
-    {
+    function _createEscrowAgreement(
+        address _beneficiary,
+        uint256 _amount,
+        string calldata _agreementURI
+    ) internal returns (uint256 _agreementId) {
         _agreementId = escrow.createERC20Transaction(
-            _amount,
-            IERC20(address(token)),
-            block.timestamp + 1 days,
-            _agreementURI,
-            payable(_beneficiary)
+            _amount, IERC20(address(token)), block.timestamp + 1 days, _agreementURI, payable(_beneficiary)
         );
     }
 }

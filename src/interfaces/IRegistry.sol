@@ -167,7 +167,12 @@ interface IRegistry {
     /// @param _price Price of the deal
     /// @param _beneficiary Address of the beneficiary
     /// @param _agreementURI URI for the agreement
-    function createDeal(uint40 _serviceId, uint256 _price, address _beneficiary, string calldata _agreementURI) external;
+    function createDeal(
+        uint40 _serviceId,
+        uint256 _price,
+        address _beneficiary,
+        string calldata _agreementURI
+    ) external;
 
     /// @notice Sets the dispute resolver address
     /// @dev

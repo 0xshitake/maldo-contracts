@@ -10,24 +10,24 @@ import {LibString} from "@solady/utils/LibString.sol";
 /// @notice ERC1155 token contract for profile badges
 contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
     using LibString for uint256;
-    
+
     /*//////////////////////////////////////////////////////////////
                                 CONSTANTS
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice Role for minting badges
     uint256 public constant MINTER_ROLE = _ROLE_0;
-    
+
     /// @notice Role for managing badge metadata and creation
     uint256 public constant BADGE_MANAGER_ROLE = _ROLE_1;
-    
+
     /// @notice Role for pausing functionality (if needed in future)
     uint256 public constant PAUSER_ROLE = _ROLE_2;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice Badge metadata structure
     /// @param name Human readable name of the badge
     /// @param description Description of what the badge represents
@@ -37,45 +37,45 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
         string description;
         address creator;
     }
-    
+
     /// @notice Maps badge ID to its metadata
     mapping(uint256 badgeId => Badge badge) public badges;
 
     /// @notice Maps badge ID to current total supply
     mapping(uint256 badgeId => uint256 supply) public totalSupply;
-    
+
     /// @notice Counter for the next badge ID
     uint256 public nextBadgeId;
-    
+
     /// @notice Base URI for token metadata
     string private _baseTokenURI;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice Emitted when a new badge type is created
     /// @param badgeId The ID of the created badge
     /// @param name The name of the badge
     event BadgeCreated(uint256 indexed badgeId, string name);
-    
+
     /// @notice Emitted when badge metadata is updated
     /// @param badgeId The ID of the updated badge
     /// @param name The new name of the badge
     event BadgeMetadataUpdated(uint256 indexed badgeId, string name);
-    
+
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
     //////////////////////////////////////////////////////////////*/
-    
+
     error CannotTransfer();
-    
+
     error InvalidParameters();
-    
+
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice Constructor
     /// @param admin Address that will have admin role
     /// @dev Sets up the contract with initial roles and URI
@@ -83,7 +83,7 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
         if (admin == address(0)) revert InvalidParameters();
 
         _initializeOwner(admin);
-        
+
         // Grant roles to the admin
         _grantRoles(admin, MINTER_ROLE | BADGE_MANAGER_ROLE | PAUSER_ROLE);
     }
@@ -91,7 +91,7 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                             BADGE MANAGEMENT
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice Creates a new badge type
     /// @param name Name of the badge
     /// @param description Description of the badge
@@ -102,18 +102,14 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
         string calldata description
     ) external onlyRoles(BADGE_MANAGER_ROLE) returns (uint256 badgeId) {
         if (bytes(name).length == 0) revert InvalidParameters();
-        
+
         badgeId = nextBadgeId++;
-        
-        badges[badgeId] = Badge({
-            name: name,
-            description: description,
-            creator: msg.sender
-        });
-        
+
+        badges[badgeId] = Badge({name: name, description: description, creator: msg.sender});
+
         emit BadgeCreated(badgeId, name);
     }
-    
+
     /// @notice Updates badge metadata
     /// @param badgeId ID of the badge to update
     /// @param name New name of the badge
@@ -123,11 +119,10 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
         string calldata name,
         string calldata description
     ) external onlyRoles(BADGE_MANAGER_ROLE) {
-        
         Badge storage badge = badges[badgeId];
         badge.name = name;
         badge.description = description;
-        
+
         emit BadgeMetadataUpdated(badgeId, name);
     }
 
@@ -148,7 +143,11 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
     /// @param to The address to mint the badges to
     /// @param ids The IDs of the badges to mint
     /// @param amounts The amounts of badges to mint
-    function mintBatch(address to, uint256[] calldata ids, uint256[] calldata amounts) external onlyRoles(MINTER_ROLE) {
+    function mintBatch(
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
+    ) external onlyRoles(MINTER_ROLE) {
         for (uint256 i = 0; i < ids.length; ++i) {
             totalSupply[ids[i]] += amounts[i];
             _mint(to, ids[i], amounts[i], "");
@@ -158,7 +157,7 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                           TRANSFER OVERRIDES
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice Override to check transferability before transfers
     /// @param from Address sending the tokens
     /// @param to Address receiving the tokens
@@ -178,10 +177,10 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
                 revert CannotTransfer();
             }
         }
-        
+
         super.safeTransferFrom(from, to, id, amount, data);
     }
-    
+
     /// @notice Override to check transferability before batch transfers
     /// @param from Address sending the tokens
     /// @param to Address receiving the tokens
@@ -204,7 +203,7 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
                 }
             }
         }
-        
+
         super.safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
@@ -212,19 +211,17 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
                             ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-
-
     /*//////////////////////////////////////////////////////////////
                             VIEW FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-    
+
     /// @notice Returns the URI for a given token ID
     /// @param tokenId Token ID to get URI for
     /// @return tokenURI The URI for the given token ID
     function uri(uint256 tokenId) public pure override returns (string memory tokenURI) {
         return string(abi.encodePacked("https://api.badges.com/", tokenId.toString()));
     }
-    
+
     /// @notice Checks if a user has earned a specific badge
     /// @param user Address to check
     /// @param badgeId Badge ID to check
@@ -233,12 +230,7 @@ contract Badges is ERC1155, OwnableRoles, ReentrancyGuard {
         return balanceOf(user, badgeId) > 0;
     }
 
-    function supportsInterface(bytes4 interfaceId) 
-        public 
-        view 
-        override 
-        returns (bool) 
-    {
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
